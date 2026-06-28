@@ -1,561 +1,1283 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YARMASC | Interactive Strategic Advisory Report</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap');
+import React, { useState, useEffect } from 'react';
 
-        :root {
-            --brand-blue: #009FDE;
-            --brand-red: #E21A22;
-            --brand-yellow: #F2A900;
-            --brand-navy: #0B1425;
-            --bg-warm: #FAF9F6;
-        }
+// ==========================================
+// CUSTOM VECTOR GRAPHICS MATCHING LOGO COLOR MATRIX
+// ==========================================
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-warm);
-            color: var(--brand-navy);
-            scroll-behavior: smooth;
-        }
+const IconAviation = () => (
+  <svg className="w-8 h-8 text-[#009FDE]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+    <line x1="12" y1="22.08" x2="12" y2="12" />
+  </svg>
+);
 
-        .font-serif { font-family: 'Playfair Display', serif; }
+const IconMobility = () => (
+  <svg className="w-8 h-8 text-[#F2A900]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 12h20" />
+    <path d="M20 12v8H4v-8" />
+    <path d="m17 5-5-3-5 3v7h10V5z" />
+    <circle cx="8" cy="16" r="1.5" />
+    <circle cx="16" cy="16" r="1.5" />
+  </svg>
+);
 
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 300px;
-            max-height: 400px;
-        }
+const IconInfrastructure = () => (
+  <svg className="w-8 h-8 text-[#E21A22]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="2" width="20" height="8" rx="2" />
+    <rect x="2" y="14" width="20" height="8" rx="2" />
+    <line x1="6" y1="10" x2="6" y2="14" />
+    <line x1="18" y1="10" x2="18" y2="14" />
+  </svg>
+);
 
-        @media (min-width: 768px) {
-            .chart-container { height: 350px; }
-        }
+const IconRealEstate = () => (
+  <svg className="w-8 h-8 text-[#6F2C91]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    <polyline points="9 22 9 12 15 12 15 22" />
+  </svg>
+);
 
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(11, 20, 37, 0.05);
-        }
+const IconSmartCities = () => (
+  <svg className="w-8 h-8 text-[#009FDE]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <circle cx="12" cy="11" r="3" />
+    <line x1="12" y1="5" x2="12" y2="8" />
+  </svg>
+);
 
-        .step-active {
-            border-color: var(--brand-blue);
-            background-color: white;
-            transform: scale(1.02);
-            box-shadow: 0 10px 15px -3px rgba(0, 159, 222, 0.1);
-        }
+const IconAssetOwners = () => (
+  <svg className="w-8 h-8 text-[#F2A900]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
 
-        /* Custom scrollbar for clean UI */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-warm); }
-        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--brand-blue); }
+export default function App() {
+  const [activeTab, setActiveTab] = useState('all');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedSector, setSelectedSector] = useState('aviation');
+  const [selectedChallenge, setSelectedChallenge] = useState('entry');
+  const [imageError, setImageError] = useState(false);
 
-        .nav-item-active {
-            color: var(--brand-blue);
-            border-bottom: 2px solid var(--brand-blue);
-        }
+  // Form states containing exact parameters specified in instructions
+  const [formData, setFormData] = useState({
+    name: '',
+    company: '',
+    email: '',
+    phone: '',
+    country: 'United Arab Emirates',
+    inquiryType: 'Aviation & Advanced Mobility',
+    sector: 'Aviation & Infrastructure',
+    requirementSummary: ''
+  });
+  
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.4s ease-out; }
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+  const triggerRFQScroll = () => {
+    const element = document.getElementById('rfq-section');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
-        /* Logic for "No SVG" - Using CSS shapes for icons */
-        .icon-box {
-            width: 12px;
-            height: 12px;
-            display: inline-block;
-            margin-right: 8px;
-        }
-        .circle-blue { border-radius: 50%; background: var(--brand-blue); }
-        .square-red { background: var(--brand-red); }
-        .diamond-yellow { background: var(--brand-yellow); transform: rotate(45deg); }
-    </style>
-</head>
-<body class="overflow-x-hidden">
+  // Maps the alignment choices directly into the RFQ Builder below
+  const handleInteractiveMatchSubmit = (e) => {
+    e.preventDefault();
+    const matchedInquiry = matchData[selectedSector]?.[selectedChallenge]?.inquiryType || 'General Inquiry';
+    const matchedSummary = `We are exploring our alignment regarding: ${matchData[selectedSector]?.[selectedChallenge]?.recommendation}. We would like to initiate an advisory discussion on our organizational readiness.`;
+    
+    setFormData(prev => ({
+      ...prev,
+      sector: selectedSector.charAt(0).toUpperCase() + selectedSector.slice(1),
+      inquiryType: matchedInquiry,
+      requirementSummary: matchedSummary
+    }));
 
-    <!-- Chosen Palette: YARMASC Corporate Matrix (Warm Neutrals, Navy, Aviation Blue, Safety Red, Amber Yellow) -->
-    <!-- Application Structure Plan: 
-        1. Dashboard Hero: Establishes context and immediate key metrics.
-        2. Sector Intelligence Explorer: An interactive tabbed section allowing users to drill down into specific industry data (Aviation, Infrastructure, etc.) without leaving the view.
-        3. Lifecycle Methodology Flow: A horizontal interactive timeline showing the YARMASC process, explaining the 'How'.
-        4. Alignment Engine: A functional tool that maps user needs to service outcomes.
-        5. Use Case Analytics: Interactive data representation of project outcomes.
-        Chosen for high information density while maintaining a 'calm' and professional navigation path.
-    -->
-    <!-- Visualization & Content Choices: 
-        - Multi-series Radar Chart (Chart.js): To show 'Readiness Levels' across different domains.
-        - Stacked Bar Chart: Showing Risk vs. Performance metrics in Use Cases.
-        - Dynamic Text Blocks: JS-controlled content updates based on sector selection.
-        - Interaction Method: Event-driven tab switching and chart data updates.
-        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
-    -->
+    setModalMessage(`Your roadmap has been successfully calculated and mapped directly into the "Request Advisory Brief / RFQ" submission form below. Scroll down to review and submit.`);
+    setShowModal(true);
+    
+    setTimeout(() => {
+      triggerRFQScroll();
+    }, 1500);
+  };
 
-    <!-- Top Navigation -->
-    <nav class="fixed top-0 w-full z-50 glass-panel border-b border-slate-200">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <div class="w-8 h-8 bg-[#0B1425] flex items-center justify-center font-bold text-white text-xs border border-blue-400">Y</div>
-                <span class="font-serif text-xl tracking-tight font-bold text-[#0B1425]">YARMASC <span class="text-blue-500">Report</span></span>
-            </div>
-            <div class="hidden md:flex space-x-8 text-[11px] font-bold uppercase tracking-widest text-slate-500">
-                <button onclick="scrollToSection('dashboard')" class="hover:text-blue-500 transition-colors">Overview</button>
-                <button onclick="scrollToSection('sectors')" class="hover:text-blue-500 transition-colors">Sectors</button>
-                <button onclick="scrollToSection('roadmap')" class="hover:text-blue-500 transition-colors">Methodology</button>
-                <button onclick="scrollToSection('engine')" class="text-blue-600 bg-blue-50 px-3 py-1 rounded">Alignment Tool</button>
-            </div>
-            <div id="abu-dhabi-clock" class="text-[10px] font-mono text-slate-400 uppercase tracking-tighter">
-                AUH 00:00:00
-            </div>
-        </div>
-    </nav>
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    setModalMessage(`Thank you, ${formData.name}. Your formal Advisory & Brokerage Request has been secured. A principal partner from the YARMASC Masdar City headquarters will verify your company coordinates and contact you at ${formData.email} within 1 business day.`);
+    setShowModal(true);
+    
+    setFormData({
+      name: '',
+      company: '',
+      email: '',
+      phone: '',
+      country: 'United Arab Emirates',
+      inquiryType: 'Aviation & Advanced Mobility',
+      sector: 'Aviation & Infrastructure',
+      requirementSummary: ''
+    });
+  };
 
-    <!-- Hero / Dashboard Overview -->
-    <section id="dashboard" class="pt-32 pb-16 px-6">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                <div class="lg:col-span-7 space-y-6">
-                    <div class="inline-block px-3 py-1 bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-widest border border-red-100 rounded">
-                        Strategic Advisory Profile
-                    </div>
-                    <h1 class="text-4xl md:text-6xl font-serif text-[#0B1425] leading-tight">
-                        Bridging Physical Assets & <br> <span class="text-blue-500 italic">Autonomous Future.</span>
-                    </h1>
-                    <p class="text-slate-600 text-lg max-w-xl leading-relaxed">
-                        This interactive report synthesizes YARMASC's methodology for enabling advanced mobility, smart infrastructure, and operational intelligence within the UAE and GCC sovereign ecosystems.
-                    </p>
-                    <div class="flex flex-wrap gap-4 pt-4">
-                        <div class="flex items-center bg-white p-4 border border-slate-100 rounded shadow-sm w-full sm:w-auto">
-                            <div class="icon-box circle-blue"></div>
-                            <div>
-                                <span class="block text-[10px] font-bold text-slate-400 uppercase">Hub Location</span>
-                                <span class="text-xs font-bold">Masdar City, Abu Dhabi</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center bg-white p-4 border border-slate-100 rounded shadow-sm w-full sm:w-auto">
-                            <div class="icon-box square-red"></div>
-                            <div>
-                                <span class="block text-[10px] font-bold text-slate-400 uppercase">Operating Core</span>
-                                <span class="text-xs font-bold">Expert-Network Model</span>
-                            </div>
-                        </div>
-                    </div>
+  const matchData = {
+    aviation: {
+      entry: {
+        recommendation: "Advanced Mobility Market Entry & SAVI Cluster Partner Mapping",
+        steps: "1. Ecosystem Feasibility Study -> 2. Partner Mapping inside Abu Dhabi -> 3. Sourcing Coordination",
+        inquiryType: "VTOL / eVTOL Market Entry"
+      },
+      efficiency: {
+        recommendation: "Aviation Supplier Infrastructure Coordination & Technical RFQ Mapping",
+        steps: "1. Supplier Matrix Audit -> 2. Risk Evaluation -> 3. Strategic Sourcing Framework",
+        inquiryType: "Aviation & Advanced Mobility"
+      },
+      lifecycle: {
+        recommendation: "Ground Support Equipment (GSE) & Airside Built Asset Lifecycle Assessment",
+        steps: "1. Asset Condition Review -> 2. OPEX/CAPEX Modeling -> 3. Decision Support Brief",
+        inquiryType: "Asset Intelligence / Cost Study"
+      }
+    },
+    infrastructure: {
+      entry: {
+        recommendation: "Smart Infrastructure Feasibility Study & Smart Cities Asset Integration",
+        steps: "1. Baseline Tech Audit -> 2. Smart City Grid Integration Planning -> 3. Regulatory Alignment Map",
+        inquiryType: "Smart Built Environment Asset Management"
+      },
+      efficiency: {
+        recommendation: "Asset Intelligence & Operational Excellence Optimization Studies",
+        steps: "1. SLA Standardisation -> 2. Cost Leakage Diagnostic -> 3. Expert Network Sourcing Execution",
+        inquiryType: "Asset Intelligence / Cost Study"
+      },
+      lifecycle: {
+        recommendation: "Built Asset Long-Term Capital Maintenance & Lifecycle Risk Profiling",
+        steps: "1. Capital Expenditure Forecasting -> 2. Risk Mitigation Design -> 3. Refurbish vs Replace Model",
+        inquiryType: "Smart Built Environment Asset Management"
+      }
+    },
+    realestate: {
+      entry: {
+        recommendation: "Commercial Portfolio Transition to Smart Built Environments Strategy",
+        steps: "1. Asset Technology Audit -> 2. Vendor Capability Assessment -> 3. Deployment Advisory Roadmap",
+        inquiryType: "Smart Built Environment Asset Management"
+      },
+      efficiency: {
+        recommendation: "High-Yield Asset Operations Review & Facilities Value Optimization Study",
+        steps: "1. Vendor Performance Diagnostics -> 2. Service Level Calibration -> 3. Out-of-Scope Protection Auditing",
+        inquiryType: "Smart Built Environment Asset Management"
+      },
+      lifecycle: {
+        recommendation: "Integrated Master Community Reserve Fund Studies & Asset Registry Rectification",
+        steps: "1. Physical Register Alignment -> 2. Reserve Component Depreciation Review -> 3. 20-Year Capital Plan Structuring",
+        inquiryType: "Asset Intelligence / Cost Study"
+      }
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0B1425] font-sans selection:bg-[#009FDE] selection:text-white antialiased">
+      
+      {/* GLOBAL TOP ANNOUNCEMENT LINE */}
+      <div className="bg-[#0B1425] text-white text-[11px] uppercase tracking-[0.25em] py-2.5 px-4 border-b border-[#009FDE]/20 text-center font-medium">
+        Abu Dhabi Hub • Masdar City Innovation Platform • Supporting GCC Asset Owners & Future Mobility Operators
+      </div>
+
+      {/* HEADER SECTION USING DIRECT LOGO */}
+      <header className="sticky top-0 z-40 bg-[#0B1425]/95 backdrop-blur-md border-b border-[#009FDE]/15">
+        <div className="max-w-7xl mx-auto px-6 h-22 flex items-center justify-between">
+          
+          {/* Logo Brand image alignment */}
+          <div className="flex items-center space-x-3 cursor-pointer py-1" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
+            {!imageError ? (
+              <img 
+                src="YarMasc Logo_2.png" 
+                alt="YARMASC Logo" 
+                onError={() => setImageError(true)}
+                className="h-12 md:h-14 w-auto object-contain"
+              />
+            ) : (
+              /* High-fidelity custom backup element mirroring the logo wing colors and typography */
+              <div className="flex items-center space-x-3">
+                <div className="relative w-11 h-11 bg-gradient-to-br from-[#009FDE] via-[#E21A22] to-[#F2A900] rounded-sm p-[1.5px]">
+                  <div className="w-full h-full bg-[#0B1425] flex items-center justify-center rounded-[1px]">
+                    <span className="text-white font-serif font-bold text-lg tracking-widest">Y</span>
+                  </div>
                 </div>
-                <div class="lg:col-span-5 bg-white p-6 rounded-xl border border-slate-100 shadow-xl">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase mb-6 tracking-widest text-center">Ecosystem Readiness Matrix</h3>
-                    <div class="chart-container">
-                        <canvas id="heroRadarChart"></canvas>
-                    </div>
-                    <p class="text-[10px] text-center text-slate-400 mt-4 italic">Baseline data reflecting UAE infrastructure maturity vs. Future Mobility targets.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Sector Intelligence Section -->
-    <section id="sectors" class="py-20 bg-slate-50">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-serif text-[#0B1425]">Sector Intelligence Explorer</h2>
-                <p class="text-slate-500 mt-2 text-sm max-w-2xl mx-auto">
-                    Drill down into the primary sectors where YARMASC deploys specialized advisory cells. Select a sector to view specific data readiness and strategic focus areas.
-                </p>
-            </div>
-
-            <!-- Interactive Tab System -->
-            <div class="flex flex-wrap justify-center gap-2 mb-8">
-                <button onclick="switchSector('aviation')" id="btn-aviation" class="sector-tab px-6 py-3 bg-white border border-slate-200 rounded text-xs font-bold uppercase tracking-widest hover:border-blue-500 transition-all shadow-sm active-tab">✈ Aviation</button>
-                <button onclick="switchSector('infrastructure')" id="btn-infrastructure" class="sector-tab px-6 py-3 bg-white border border-slate-200 rounded text-xs font-bold uppercase tracking-widest hover:border-blue-500 transition-all shadow-sm">⚙ Infrastructure</button>
-                <button onclick="switchSector('realestate')" id="btn-realestate" class="sector-tab px-6 py-3 bg-white border border-slate-200 rounded text-xs font-bold uppercase tracking-widest hover:border-blue-500 transition-all shadow-sm">🏢 Real Estate</button>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                <!-- Data Visual Side -->
-                <div class="lg:col-span-5 bg-white p-8 rounded border border-slate-100 shadow-sm">
-                    <h4 class="text-xs font-bold text-slate-400 uppercase mb-6 tracking-widest" id="sector-chart-title">Aviation Readiness Breakdown</h4>
-                    <div class="chart-container">
-                        <canvas id="sectorBarChart"></canvas>
-                    </div>
-                </div>
-                <!-- Content Description Side -->
-                <div class="lg:col-span-7 space-y-8">
-                    <div id="sector-info" class="p-8 bg-white border-l-4 border-blue-500 rounded-r shadow-sm min-h-[300px]">
-                        <!-- Content injected via JS -->
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="p-4 bg-white border border-slate-100 rounded">
-                            <span class="block text-[10px] font-bold text-blue-500 uppercase mb-1">Primary Mandate</span>
-                            <p id="sector-mandate" class="text-xs text-slate-600 font-semibold"></p>
-                        </div>
-                        <div class="p-4 bg-white border border-slate-100 rounded">
-                            <span class="block text-[10px] font-bold text-yellow-600 uppercase mb-1">Market Context</span>
-                            <p id="sector-context" class="text-xs text-slate-600 font-semibold"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Strategic Process Section -->
-    <section id="roadmap" class="py-24 px-6 bg-white">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
                 <div>
-                    <h2 class="text-3xl font-serif text-[#0B1425]">Strategic Process Roadmap</h2>
-                    <p class="text-slate-500 mt-2 text-sm">A non-linear, adaptive framework for high-stakes infrastructure mandates.</p>
+                  <span className="text-xl font-bold text-white tracking-[0.2em] font-serif block">YARMASC</span>
+                  <span className="text-[8px] text-[#009FDE] tracking-[0.25em] uppercase block -mt-1 font-semibold">Smart Assets & Mobility</span>
                 </div>
-                <div class="text-[10px] font-mono bg-slate-100 px-3 py-1 rounded text-slate-500">
-                    PHASE: <span id="current-phase-display" class="text-blue-600 font-bold uppercase">Discovery</span>
-                </div>
-            </div>
+              </div>
+            )}
+          </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div onclick="setProcess(0)" class="process-step cursor-pointer p-6 border-t-4 border-slate-200 transition-all step-active" id="step-0">
-                    <span class="text-2xl font-serif text-slate-200 block mb-4">01</span>
-                    <h4 class="text-xs font-bold uppercase tracking-widest mb-2">Discover</h4>
-                    <p class="text-[11px] text-slate-500 leading-relaxed">Comprehensive audit of physical registers and component histories.</p>
-                </div>
-                <div onclick="setProcess(1)" class="process-step cursor-pointer p-6 border-t-4 border-slate-200 transition-all" id="step-1">
-                    <span class="text-2xl font-serif text-slate-200 block mb-4">02</span>
-                    <h4 class="text-xs font-bold uppercase tracking-widest mb-2">Diagnose</h4>
-                    <p class="text-[11px] text-slate-500 leading-relaxed">Exposing cost leakages and diagnostic lifecycle checks.</p>
-                </div>
-                <div onclick="setProcess(2)" class="process-step cursor-pointer p-6 border-t-4 border-slate-200 transition-all" id="step-2">
-                    <span class="text-2xl font-serif text-slate-200 block mb-4">03</span>
-                    <h4 class="text-xs font-bold uppercase tracking-widest mb-2">Structure</h4>
-                    <p class="text-[11px] text-slate-500 leading-relaxed">Deploying custom specialist cells and compliance pathways.</p>
-                </div>
-                <div onclick="setProcess(3)" class="process-step cursor-pointer p-6 border-t-4 border-slate-200 transition-all" id="step-3">
-                    <span class="text-2xl font-serif text-slate-200 block mb-4">04</span>
-                    <h4 class="text-xs font-bold uppercase tracking-widest mb-2">Enable</h4>
-                    <p class="text-[11px] text-slate-500 leading-relaxed">Facilitating connections and advisory delivery execution.</p>
-                </div>
-                <div onclick="setProcess(4)" class="process-step cursor-pointer p-6 border-t-4 border-slate-200 transition-all" id="step-4">
-                    <span class="text-2xl font-serif text-slate-200 block mb-4">05</span>
-                    <h4 class="text-xs font-bold uppercase tracking-widest mb-2">Optimise</h4>
-                    <p class="text-[11px] text-slate-500 leading-relaxed">Ongoing reviews and SLA maintenance tracking.</p>
-                </div>
-            </div>
+          {/* Desktop Navigation links */}
+          <nav className="hidden md:flex items-center space-x-8 text-xs uppercase tracking-widest font-semibold text-gray-300">
+            <a href="#about" className="hover:text-[#009FDE] transition-colors">About YARMASC</a>
+            <a href="#capabilities" className="hover:text-[#009FDE] transition-colors">Offerings</a>
+            <a href="#process" className="hover:text-[#009FDE] transition-colors">Strategic Process</a>
+            <a href="#usecases" className="hover:text-[#009FDE] transition-colors">Use Cases</a>
+            <a href="#advisor-tool" className="text-[#009FDE] hover:text-white transition-colors flex items-center gap-1.5 border border-[#009FDE]/30 px-3.5 py-1.5 rounded-sm bg-[#009FDE]/5">
+              <span className="w-1.5 h-1.5 bg-[#E21A22] rounded-full"></span>
+              <span>Alignment Engine</span>
+            </a>
+          </nav>
 
-            <div id="process-detail" class="mt-8 p-10 bg-slate-50 rounded-xl border border-slate-100 flex flex-col items-center text-center">
-                <!-- Injected text -->
-                <p id="process-main-text" class="text-slate-600 italic text-lg max-w-3xl leading-relaxed">"Every successful asset lifecycle begins with the absolute rectification of physical data records."</p>
-                <div class="mt-6 flex gap-2">
-                    <div class="icon-box circle-blue"></div>
-                    <div class="icon-box diamond-yellow"></div>
-                </div>
-            </div>
+          {/* Header Action Button */}
+          <div className="hidden lg:block">
+            <button 
+              onClick={triggerRFQScroll} 
+              className="bg-gradient-to-r from-[#009FDE] to-[#0081B4] hover:from-[#0081B4] hover:to-[#006A94] text-white font-bold text-xs uppercase tracking-widest px-5 py-3.5 rounded-sm transition-all shadow-lg shadow-[#009FDE]/10 active:translate-y-px"
+            >
+              Submit RFQ / Inquiry
+            </button>
+          </div>
+
+          {/* Mobile Hamburguer Menu Button */}
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden text-white hover:text-[#009FDE] focus:outline-none"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {menuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
-    </section>
 
-    <!-- Interactive Alignment Engine -->
-    <section id="engine" class="py-20 bg-slate-900 text-white relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10">
-            <div class="absolute inset-0 bg-[radial-gradient(#009FDE_1px,transparent_1px)] [background-size:20px_20px]"></div>
-        </div>
+        {/* Mobile Navigation Dropdown */}
+        {menuOpen && (
+          <div className="md:hidden bg-[#0B1425] border-b border-[#009FDE]/20 py-4 px-6 space-y-4 text-xs uppercase tracking-widest font-bold">
+            <a href="#about" onClick={() => setMenuOpen(false)} className="block text-gray-300 hover:text-[#009FDE] py-2">About YARMASC</a>
+            <a href="#capabilities" onClick={() => setMenuOpen(false)} className="block text-gray-300 hover:text-[#009FDE] py-2">Offerings</a>
+            <a href="#process" onClick={() => setMenuOpen(false)} className="block text-gray-300 hover:text-[#009FDE] py-2">Strategic Process</a>
+            <a href="#usecases" onClick={() => setMenuOpen(false)} className="block text-gray-300 hover:text-[#009FDE] py-2">Use Cases</a>
+            <a href="#advisor-tool" onClick={() => setMenuOpen(false)} className="block text-[#009FDE] py-2">Alignment Engine</a>
+            <button 
+              onClick={() => { setMenuOpen(false); triggerRFQScroll(); }} 
+              className="w-full bg-[#009FDE] text-white text-center font-bold uppercase tracking-widest py-3 mt-2 rounded-sm"
+            >
+              Submit RFQ / Inquiry
+            </button>
+          </div>
+        )}
+      </header>
+
+      {}
+      <section className="relative bg-[#0B1425] text-white overflow-hidden py-16 lg:py-28">
         
-        <div class="max-w-4xl mx-auto px-6 relative z-10">
-            <div class="text-center mb-12">
-                <span class="text-blue-400 text-[10px] font-bold uppercase tracking-[0.3em]">Decision Support System</span>
-                <h2 class="text-4xl font-serif mt-2">Alignment Recommendation Engine</h2>
-                <p class="text-slate-400 mt-4 text-sm">Input your primary challenge to find the optimal YARMASC advisory cell.</p>
-            </div>
-
-            <div class="bg-white/5 border border-white/10 p-8 rounded-xl backdrop-blur-md">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <div class="space-y-3">
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400">Industry Challenge</label>
-                        <select id="engine-challenge" class="w-full bg-slate-800 border border-slate-700 rounded p-4 text-sm text-white focus:border-blue-500 outline-none">
-                            <option value="entry">New Market Entry / Partner Mapping</option>
-                            <option value="leakage">SLA Optimization / Cost Leakage</option>
-                            <option value="lifecycle">Asset Depreciation & Capital Strategy</option>
-                            <option value="sourcing">Supply Structure / B2B Coordination</option>
-                        </select>
-                    </div>
-                    <div class="space-y-3">
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-400">Organization Type</label>
-                        <select id="engine-org" class="w-full bg-slate-800 border border-slate-700 rounded p-4 text-sm text-white focus:border-blue-500 outline-none">
-                            <option value="asset">Sovereign / Master Asset Owner</option>
-                            <option value="tech">Global Tech Innovator (VTOL/UAV)</option>
-                            <option value="infra">Critical Infrastructure Provider</option>
-                            <option value="invest">Private Equity / Investment Fund</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="text-center">
-                    <button onclick="calculateAlignment()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-widest px-10 py-4 rounded transition-all shadow-lg shadow-blue-500/20">
-                        Synthesize Roadmap
-                    </button>
-                </div>
-
-                <div id="engine-result" class="mt-12 hidden animate-fadeIn">
-                    <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row gap-8 items-center">
-                        <div class="w-full md:w-1/2 p-6 bg-blue-600/10 border border-blue-500/30 rounded-lg">
-                            <h4 class="text-blue-400 text-xs font-bold uppercase tracking-widest mb-2">Recommended Advisory Mandate</h4>
-                            <p id="res-title" class="text-lg font-serif mb-4"></p>
-                            <div id="res-steps" class="space-y-2 text-[11px] text-slate-300">
-                                <!-- Steps list -->
-                            </div>
-                        </div>
-                        <div class="w-full md:w-1/2">
-                            <p id="res-desc" class="text-xs text-slate-400 leading-relaxed"></p>
-                            <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
-                                <span class="text-[10px] font-mono text-slate-500 uppercase">Est. Engagement Lead</span>
-                                <span class="text-[10px] font-bold text-blue-400">48 HRS TO INITIATION</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        {/* Dynamic laser-lines simulating flight-grid elements */}
+        <div className="absolute inset-0 opacity-15">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#009FDE_1px,transparent_1px),linear-gradient(to_bottom,#F2A900_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+          <div className="absolute top-10 right-20 w-96 h-96 bg-gradient-to-br from-[#E21A22] to-transparent rounded-full filter blur-3xl opacity-20"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-96 bg-gradient-to-t from-[#0B1425] to-transparent"></div>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="py-16 bg-[#0B1425] text-white border-t border-white/5">
-        <div class="max-w-7xl mx-auto px-6 text-center">
-            <div class="mb-8 flex justify-center items-center space-x-2 opacity-60">
-                <div class="w-6 h-6 bg-white/10 flex items-center justify-center font-bold text-white text-[10px] border border-white/20">Y</div>
-                <span class="font-serif text-lg font-bold tracking-tight">YARMASC</span>
+        <div className="max-w-7xl mx-auto px-6 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <div className="lg:col-span-7 space-y-8">
+            <div className="inline-flex items-center space-x-2 border border-[#009FDE]/30 bg-[#009FDE]/10 px-3.5 py-2 rounded-full">
+              <span className="w-2 h-2 rounded-full bg-[#E21A22] animate-ping"></span>
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#009FDE]">Boutique GCC Strategic Platform</span>
             </div>
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.5em] mb-12">Smart Assets &bull; Future Mobility &bull; Operational Intelligence</p>
+
+            {/* Fully visible responsive headline */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6.5xl font-serif tracking-tight leading-[1.1] text-white">
+              Smart Assets.<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#009FDE] via-[#F2A900] to-[#E21A22]">Future Mobility.</span><br />
+              Operational Intelligence.
+            </h1>
+
+            <p className="text-gray-300 text-sm sm:text-base md:text-lg max-w-2xl leading-relaxed">
+              Based in Masdar City, YARMASC provides critical lifecycle support, B2B sourcing coordination, and partner mapping for asset-intensive enterprises, airports, and future aviation operators across the UAE and GCC.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <button 
+                onClick={triggerRFQScroll}
+                className="bg-gradient-to-r from-[#009FDE] to-[#0081B4] hover:from-[#0081B4] hover:to-[#006A94] text-white font-bold text-xs uppercase tracking-widest px-8 py-4.5 rounded-sm transition-all flex items-center justify-center space-x-2 shadow-lg shadow-[#009FDE]/20"
+              >
+                <span>Initiate Sourcing Consultation</span>
+                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </button>
+              <a 
+                href="#capabilities" 
+                className="border border-[#009FDE]/30 bg-[#0B1425] hover:border-[#009FDE] text-white font-bold text-xs uppercase tracking-widest px-8 py-4.5 rounded-sm transition-all text-center flex items-center justify-center"
+              >
+                View Capabilities
+              </a>
+            </div>
+
+            {/* Branded corporate statement bar */}
+            <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center gap-4 text-xs tracking-widest uppercase font-semibold">
+              <div className="flex items-center gap-2 text-[#009FDE]">
+                <span className="w-1.5 h-1.5 bg-[#009FDE] rounded-full"></span>
+                <span>Guarding Assets</span>
+              </div>
+              <div className="hidden sm:block text-white/20">•</div>
+              <div className="flex items-center gap-2 text-[#F2A900]">
+                <span className="w-1.5 h-1.5 bg-[#F2A900] rounded-full"></span>
+                <span>Strengthening Operations</span>
+              </div>
+              <div className="hidden sm:block text-white/20">•</div>
+              <div className="flex items-center gap-2 text-[#E21A22]">
+                <span className="w-1.5 h-1.5 bg-[#E21A22] rounded-full"></span>
+                <span>Enabling Mobility</span>
+              </div>
+            </div>
+          </div>
+
+          {}
+          <div className="lg:col-span-5 relative hidden lg:block">
+            <div className="relative w-full aspect-square max-w-[420px] mx-auto bg-[#121926] rounded-sm border border-[#009FDE]/25 shadow-2xl p-6 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#0B1425] to-[#121926]"></div>
+              
+              {/* Dynamic Digital Twin Mesh Representation */}
+              <div className="absolute inset-0 opacity-15">
+                <div className="w-full h-full bg-[linear-gradient(to_right,#009FDE_1px,transparent_1px),linear-gradient(to_bottom,#E21A22_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+              </div>
+
+              <div className="relative h-full flex flex-col justify-between">
+                {/* Header Metrics */}
+                <div className="flex justify-between items-center text-[10px] tracking-wider text-gray-400">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#E21A22] inline-block"></span>
+                    ADVISORY MODEL : GCC REGION
+                  </span>
+                  <span className="font-mono text-[#009FDE]">MASDAR HUB</span>
+                </div>
+
+                {/* Abstract dynamic wing vector mimicking YarMasc Logo_2.png colors */}
+                <div className="my-auto relative flex justify-center items-center h-48">
+                  {/* Rotating orbital paths */}
+                  <div className="absolute w-44 h-44 rounded-full border border-dashed border-[#009FDE]/20 animate-spin" style={{ animationDuration: '30s' }}></div>
+                  <div className="absolute w-32 h-32 rounded-full border border-dashed border-[#F2A900]/20 animate-spin" style={{ animationDuration: '15s' }}></div>
+                  
+                  {/* Central Node representing Airport / Hub Infrastructure */}
+                  <div className="relative w-16 h-16 rounded-full bg-[#0B1425] border border-[#009FDE]/40 flex items-center justify-center shadow-lg">
+                    <svg className="w-7 h-7 text-[#009FDE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+
+                  {/* Satellite nodes styled with exact brand gradient hues */}
+                  <div className="absolute top-4 left-10 w-4 h-4 bg-[#0B1425] border-2 border-[#F2A900] rounded-sm transform rotate-45 flex items-center justify-center">
+                    <span className="w-1 bg-[#F2A900] h-1 rounded-sm"></span>
+                  </div>
+                  <div className="absolute bottom-6 right-12 w-5 h-5 bg-[#0B1425] border border-[#E21A22] rounded-full flex items-center justify-center">
+                    <span className="w-1.5 h-1.5 bg-[#E21A22] rounded-full animate-ping"></span>
+                  </div>
+                  
+                  {/* Flight trajectory lines */}
+                  <svg className="absolute inset-0 w-full h-full text-[#009FDE]/30" viewBox="0 0 200 200">
+                    <line x1="40" y1="40" x2="100" y2="100" stroke="currentColor" strokeWidth="1" strokeDasharray="3 3" />
+                    <line x1="160" y1="140" x2="100" y2="100" stroke="#E21A22" strokeWidth="1.2" strokeDasharray="2 2" />
+                  </svg>
+                </div>
+
+                {/* Dashboard summary metrics */}
+                <div className="bg-[#0B1425]/90 border border-white/10 rounded p-3.5 font-mono text-[10px] space-y-1.5">
+                  <div className="flex justify-between text-gray-400">
+                    <span>Ecosystem Connectivity:</span>
+                    <span className="text-[#009FDE] font-bold">OPTIMIZED</span>
+                  </div>
+                  <div className="flex justify-between text-gray-400">
+                    <span>VTOL / UAV Site Readiness:</span>
+                    <span className="text-white font-bold">SAVI READY</span>
+                  </div>
+                  <div className="flex justify-between text-gray-400">
+                    <span>Sourcing Risk Exposure:</span>
+                    <span className="text-[#F2A900] font-bold">MINIMIZED</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {}
+      <section className="bg-white py-14 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="text-center text-[10px] tracking-[0.3em] font-extrabold uppercase text-[#0B1425] mb-8">
+            BUILT FOR ASSET-INTENSIVE GCC SECTORS
+          </p>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             
-            <div class="max-w-2xl mx-auto text-center space-y-6">
-                <p class="text-[10px] text-slate-500 leading-relaxed italic">
-                    Regulatory Disclaimer: YARMASC provides advisory and brokerage services. Statutory certifications, licensed engineering approvals, and regulated MRO operations are handled by third-party licensed specialists within our curated network.
+            <div className="flex flex-col items-center p-5 bg-[#F8FAFC] border border-gray-100 hover:border-[#009FDE]/30 rounded-sm transition-all text-center">
+              <IconAviation />
+              <span className="text-xs font-bold tracking-wider uppercase mt-3 text-[#0B1425]">Aviation</span>
+              <span className="text-[10px] text-gray-400 mt-1">Airports & Mobility</span>
+            </div>
+
+            <div className="flex flex-col items-center p-5 bg-[#F8FAFC] border border-gray-100 hover:border-[#F2A900]/30 rounded-sm transition-all text-center">
+              <IconMobility />
+              <span className="text-xs font-bold tracking-wider uppercase mt-3 text-[#0B1425]">Mobility</span>
+              <span className="text-[10px] text-gray-400 mt-1">UAV / eVTOL Networks</span>
+            </div>
+
+            <div className="flex flex-col items-center p-5 bg-[#F8FAFC] border border-gray-100 hover:border-[#E21A22]/30 rounded-sm transition-all text-center">
+              <IconInfrastructure />
+              <span className="text-xs font-bold tracking-wider uppercase mt-3 text-[#0B1425]">Infrastructure</span>
+              <span className="text-[10px] text-gray-400 mt-1">Critical Systems</span>
+            </div>
+
+            <div className="flex flex-col items-center p-5 bg-[#F8FAFC] border border-gray-100 hover:border-[#6F2C91]/30 rounded-sm transition-all text-center">
+              <IconRealEstate />
+              <span className="text-xs font-bold tracking-wider uppercase mt-3 text-[#0B1425]">Real Estate</span>
+              <span className="text-[10px] text-gray-400 mt-1">Smart Portfolios</span>
+            </div>
+
+            <div className="flex flex-col items-center p-5 bg-[#F8FAFC] border border-gray-100 hover:border-[#009FDE]/30 rounded-sm transition-all text-center">
+              <IconSmartCities />
+              <span className="text-xs font-bold tracking-wider uppercase mt-3 text-[#0B1425]">Smart Cities</span>
+              <span className="text-[10px] text-gray-400 mt-1">Masdar Ecosystem</span>
+            </div>
+
+            <div className="flex flex-col items-center p-5 bg-[#F8FAFC] border border-gray-100 hover:border-[#F2A900]/30 rounded-sm transition-all text-center">
+              <IconAssetOwners />
+              <span className="text-xs font-bold tracking-wider uppercase mt-3 text-[#0B1528]">Asset Owners</span>
+              <span className="text-[10px] text-gray-400 mt-1">Sovereign & Private</span>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {}
+      <section className="py-16 bg-[#121926] text-white relative">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <div className="p-8 bg-[#0B1425] border-l-4 border-[#009FDE] rounded-r-sm space-y-3 shadow-md">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#009FDE]">Founder-Led Advisory</span>
+              <h3 className="text-xl font-serif text-white">Direct Executive Oversight</h3>
+              <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                Zero dilution of expertise. Every single mandate is curated, structured, and overseen directly by the founder to maintain absolute boardroom alignment.
+              </p>
+            </div>
+
+            <div className="p-8 bg-[#0B1425] border-l-4 border-[#F2A900] rounded-r-sm space-y-3 shadow-md">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#F2A900]">GCC Market Focus</span>
+              <h3 className="text-xl font-serif text-white">UAE Core Infrastructure</h3>
+              <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                Operating directly from Masdar City, Abu Dhabi, we map our capability directly onto the growing regulatory parameters of the GCC sovereign space.
+              </p>
+            </div>
+
+            <div className="p-8 bg-[#0B1528] border-l-4 border-[#E21A22] rounded-r-sm space-y-3 shadow-md">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#E21A22]">Expert-Network Model</span>
+              <h3 className="text-xl font-serif text-white">Elastic Specialist Deployment</h3>
+              <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                We bypass corporate overheads by deploying custom expert arrays specifically coordinated to solve your immediate asset-lifespan obstacles.
+              </p>
+            </div>
+
+            <div className="p-8 bg-[#0B1425] border-l-4 border-[#009FDE] rounded-r-sm space-y-3 shadow-md">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#009FDE]">Smart Assets</span>
+              <h3 className="text-xl font-serif text-white">Digital Technology Readiness</h3>
+              <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                Translating technology metrics into hard physical asset longevity. Preparing digital twins and asset registers for robust vendor handovers.
+              </p>
+            </div>
+
+            <div className="p-8 bg-[#0B1425] border-l-4 border-[#F2A900] rounded-r-sm space-y-3 shadow-md">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#F2A900]">Future Mobility</span>
+              <h3 className="text-xl font-serif text-white">Advanced Transport Coordination</h3>
+              <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                Positioning developers and infrastructure players to align with autonomous aviation, vertiport site feasibility, and heavy equipment mapping.
+              </p>
+            </div>
+
+            <div className="p-8 bg-[#0B1425] border-l-4 border-[#E21A22] rounded-r-sm space-y-3 shadow-md">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#E21A22]">Operational Intelligence</span>
+              <h3 className="text-xl font-serif text-white">Definitive Capital Decisions</h3>
+              <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                Providing diagnostic studies, OPEX evaluation, and contract leak analysis to assure executive boards of zero technical leakage.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {}
+      <section id="about" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            {/* Left Column Graphic reflecting Corporate details */}
+            <div className="lg:col-span-5 space-y-4">
+              <div className="bg-[#0B1425] border border-[#009FDE]/35 rounded-sm p-8 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-28 h-28 bg-[#009FDE]/10 rounded-full blur-2xl"></div>
+                
+                <span className="text-[10px] font-bold tracking-widest uppercase text-[#F2A900] block mb-2">GEOGRAPHICAL HUB</span>
+                <h4 className="text-2xl font-serif text-white mb-4">Masdar City, Abu Dhabi</h4>
+                <p className="text-xs text-gray-300 leading-relaxed mb-6">
+                  Established inside the premier capital innovation zone of the UAE, supporting GCC sovereign asset planning and future-built community requirements.
                 </p>
-                <div class="pt-6 border-t border-white/5 text-[9px] text-slate-600 uppercase tracking-widest font-mono">
-                    © 2024 YARMASC. Masdar City, Abu Dhabi. Secure Platform ID: 402-991-GCC
+
+                <div className="space-y-3 font-mono text-[11px] border-t border-white/10 pt-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Hub Office:</span>
+                    <span className="text-white">Abu Dhabi, UAE</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Asset Baseline:</span>
+                    <span className="text-white">Smart Built Assets</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Network Model:</span>
+                    <span className="text-white">Direct Outcome Oversight</span>
+                  </div>
                 </div>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-100 rounded-sm p-5 text-center">
+                <p className="text-xs text-gray-500 italic">
+                  "YARMASC operates as an absolute independent advisory platform. We do not hold inventory or secure vendor retainers, guaranteeing client alignment."
+                </p>
+              </div>
             </div>
+
+            {/* Right Column Corporate Narrative */}
+            <div className="lg:col-span-7 space-y-6">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#009FDE]">Boutique Framework</span>
+              <h2 className="text-3xl sm:text-4xl font-serif text-[#0B1425]">
+                About YARMASC Advisory Platform
+              </h2>
+              
+              <div className="space-y-4 text-gray-600 text-sm sm:text-base leading-relaxed">
+                <p>
+                  YARMASC is a business services and premium advisory platform established in Abu Dhabi, the capital of the UAE and a global meeting point for investment, innovation, sustainability, and future mobility.
+                </p>
+                <p>
+                  Operating from Masdar City, one of the region’s leading ecosystems for clean energy, sustainable urban development and technology-led enterprise, YARMASC is positioned to support organizations navigating the next generation of asset, mobility and operational challenges.
+                </p>
+                <p>
+                  We work with asset owners, investors, infrastructure stakeholders, aviation and mobility businesses, and enterprise clients across the UAE and GCC to bring clarity to complex decisions. Our focus is on smart built environments, advanced mobility, asset intelligence, operational studies, B2B sourcing coordination and strategic business advisory.
+                </p>
+                <p>
+                  Through a curated <strong className="text-[#0B1425]">expert-network model</strong>, we bring together specialist capability, market intelligence and trusted partner access while maintaining direct oversight of strategy, quality, governance and delivery outcomes.
+                </p>
+              </div>
+
+              <div className="pt-4 flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-slate-50 border border-[#009FDE]/30 flex items-center justify-center">
+                  <span className="w-2 h-2 rounded-full bg-[#E21A22]"></span>
+                </div>
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#0B1425] block">Guarding Assets & Operations</span>
+                  <span className="text-[11px] text-gray-500 block">Ensuring zero operational leakage or technological displacement.</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
-    </footer>
+      </section>
 
-    <!-- JavaScript Logic -->
-    <script>
-        // 1. Core Data
-        const sectorData = {
-            aviation: {
-                title: "Aviation & Advanced Mobility",
-                info: "YARMASC is positioned to support regional stakeholders in preparing site parameters, vertiport layout specifications, and autonomous aircraft integration guidelines. We focus on the non-operational technical readiness that bridges existing hub infrastructure with the SAVI cluster requirements.",
-                chartData: [85, 40, 92, 60], // Readiness: Regulations, Infrastructure, Intent, Supply Chain
-                labels: ['Regulations', 'Vertiports', 'Hub Capacity', 'Logistics'],
-                mandate: "Advanced Mobility Entry Strategy",
-                context: "Masdar City SAVI Alignment"
-            },
-            infrastructure: {
-                title: "Smart Critical Infrastructure",
-                info: "We focus on the digital baseline of physical assets. Mapping physical facility records to long-term lifecycle metrics allows asset owners to standardize digital twins and predictive maintenance registers, ensuring zero operational leakage.",
-                chartData: [70, 85, 65, 78],
-                labels: ['Digital Twin', 'Energy Grid', 'SLA Health', 'CAPEX Study'],
-                mandate: "Asset Intelligence Diagnostics",
-                context: "GCC Smart City Framework"
-            },
-            realestate: {
-                title: "High-Value Commercial Real Estate",
-                info: "Translating master development vision into hard physical asset longevity. We support investors in performing physical register rectification and 20-year capital maintenance reserve projections for massive-scale built portfolios.",
-                chartData: [95, 60, 45, 80],
-                labels: ['Asset Registry', 'Lifecycle Risk', 'PropTech', 'Portfolio ROI'],
-                mandate: "Capital Maintenance Planning",
-                context: "Master Community ROI Protect"
-            }
-        };
+      {}
+      <section id="capabilities" className="py-20 bg-[#F8FAFC] border-t border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6">
+          
+          <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#009FDE]">Our Capabilities</span>
+            <h2 className="text-3xl sm:text-4xl font-serif text-[#0B1425]">
+              Capabilities & Offerings
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-500">
+              High-context advisory divisions providing technical readiness across infrastructure and transit environments.
+            </p>
+          </div>
 
-        const processSteps = [
-            "Baseline data collection and physical asset registry rectification.",
-            "Diagnostic studies to uncover hidden OPEX leakages and SLA failures.",
-            "Designing customized expert-cell arrays to resolve identified risks.",
-            "Active facilitation of B2B coordination and strategic partner mapping.",
-            "Ongoing monitoring of lifecycle metrics to ensure long-term value preservation."
-        ];
-
-        // 2. State Management
-        let appState = {
-            activeSector: 'aviation',
-            activeStep: 0,
-            sectorChart: null,
-            heroChart: null
-        };
-
-        // 3. Initialization
-        window.onload = () => {
-            initHeroChart();
-            initSectorChart();
-            switchSector('aviation');
-            updateClock();
-            setInterval(updateClock, 1000);
-        };
-
-        // 4. Utility Functions
-        function scrollToSection(id) {
-            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function updateClock() {
-            const now = new Date();
-            const options = { timeZone: 'Asia/Dubai', hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' };
-            const timeStr = now.toLocaleTimeString('en-US', options);
-            document.getElementById('abu-dhabi-clock').innerText = `AUH ${timeStr}`;
-        }
-
-        // 5. Chart Management
-        function initHeroChart() {
-            const ctx = document.getElementById('heroRadarChart').getContext('2d');
-            appState.heroChart = new Chart(ctx, {
-                type: 'radar',
-                data: {
-                    labels: ['Connectivity', 'Regulatory', 'Digital Twin', 'Cost Guard', 'Mobility', 'Asset Hubs'],
-                    datasets: [{
-                        label: 'Market Average',
-                        data: [65, 45, 40, 70, 30, 80],
-                        borderColor: '#E21A22',
-                        backgroundColor: 'rgba(226, 26, 34, 0.1)',
-                        pointRadius: 2
-                    }, {
-                        label: 'YARMASC Benchmarks',
-                        data: [90, 85, 95, 90, 80, 95],
-                        borderColor: '#009FDE',
-                        backgroundColor: 'rgba(0, 159, 222, 0.2)',
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    scales: {
-                        r: { 
-                            angleLines: { display: true },
-                            suggestedMin: 0,
-                            suggestedMax: 100,
-                            ticks: { display: false }
-                        }
-                    },
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
-                    }
-                }
-            });
-        }
-
-        function initSectorChart() {
-            const ctx = document.getElementById('sectorBarChart').getContext('2d');
-            appState.sectorChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Readiness Score %',
-                        data: [],
-                        backgroundColor: '#009FDE',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, max: 100, ticks: { font: { size: 10 } } },
-                        x: { ticks: { font: { size: 10 } } }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-        }
-
-        function switchSector(key) {
-            const data = sectorData[key];
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             
-            // Update UI State
-            document.querySelectorAll('.sector-tab').forEach(btn => btn.classList.remove('bg-blue-600', 'text-white'));
-            document.getElementById(`btn-${key}`).classList.add('bg-blue-600', 'text-white');
-            
-            // Update Content
-            document.getElementById('sector-chart-title').innerText = `${data.title} Readiness`;
-            document.getElementById('sector-info').innerHTML = `
-                <h3 class="text-xl font-serif mb-4 text-[#0B1425]">${data.title}</h3>
-                <p class="text-slate-600 leading-relaxed text-sm">${data.info}</p>
-            `;
-            document.getElementById('sector-mandate').innerText = data.mandate;
-            document.getElementById('sector-context').innerText = data.context;
+            {/* Division 1 */}
+            <div className="bg-white p-8 border border-gray-100 rounded-sm hover:shadow-lg hover:border-[#009FDE]/35 transition-all space-y-4 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-sm bg-[#0B1425] flex items-center justify-center text-[#009FDE]">
+                  <IconAviation />
+                </div>
+                <h3 className="text-lg font-serif text-[#0B1425] font-bold">Aviation & Advanced Mobility Advisory</h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                  Supporting regional stakeholders in preparing site parameters, vertiport layout specifications, and autonomous aircraft integration guidelines. Fully aligned with the SAVI cluster's parameters.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-gray-50 flex justify-between items-center text-[10px] font-semibold text-[#009FDE] tracking-wider uppercase">
+                <span>Advisory Focus</span>
+                <span>NON-OPERATIONAL</span>
+              </div>
+            </div>
 
-            // Update Chart
-            appState.sectorChart.data.labels = data.labels;
-            appState.sectorChart.data.datasets[0].data = data.chartData;
-            appState.sectorChart.update();
-        }
+            {/* Division 2 */}
+            <div className="bg-white p-8 border border-gray-100 rounded-sm hover:shadow-lg hover:border-[#F2A900]/35 transition-all space-y-4 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-sm bg-[#0B1425] flex items-center justify-center text-[#F2A900]">
+                  <IconRealEstate />
+                </div>
+                <h3 className="text-lg font-serif text-[#0B1425] font-bold">Smart Built Environment Asset Management</h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                  Mapping physical facility records to long-term lifecycle metrics. Support in standardizing digital twins, predictive registers, and technological baseline alignment.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-gray-50 flex justify-between items-center text-[10px] font-semibold text-[#F2A900] tracking-wider uppercase">
+                <span>Asset Support</span>
+                <span>DATA READINESS</span>
+              </div>
+            </div>
 
-        function setProcess(index) {
-            document.querySelectorAll('.process-step').forEach(s => s.classList.remove('step-active'));
-            document.getElementById(`step-${index}`).classList.add('step-active');
-            
-            const titles = ["Discovery", "Diagnosis", "Structure", "Enablement", "Optimization"];
-            document.getElementById('current-phase-display').innerText = titles[index];
-            document.getElementById('process-main-text').innerText = `"${processSteps[index]}"`;
-        }
+            {/* Division 3 */}
+            <div className="bg-white p-8 border border-gray-100 rounded-sm hover:shadow-lg hover:border-[#E21A22]/35 transition-all space-y-4 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-sm bg-[#0B1425] flex items-center justify-center text-[#E21A22]">
+                  <IconInfrastructure />
+                </div>
+                <h3 className="text-lg font-serif text-[#0B1425] font-bold">Asset Intelligence, Cost & Risk Studies</h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                  Constructing granular OPEX depreciation structures, contract risk diagnostics, SLA validation modeling, and 20-year capital maintenance reserve projections.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-gray-50 flex justify-between items-center text-[10px] font-semibold text-[#E21A22] tracking-wider uppercase">
+                <span>Lifecycle Analysis</span>
+                <span>BOARDROOM DATA</span>
+              </div>
+            </div>
 
-        // 6. Engine Logic
-        function calculateAlignment() {
-            const challenge = document.getElementById('engine-challenge').value;
-            const org = document.getElementById('engine-org').value;
-            const resultDiv = document.getElementById('engine-result');
-            
-            resultDiv.classList.remove('hidden');
-            
-            const resultsMap = {
-                'entry': {
-                    title: "Market Access & Partner Synthesis",
-                    desc: "Ideal for technology providers entering the GCC. YARMASC acts as the coordinate facilitator for regulatory mapping and local ecosystem integration.",
-                    steps: ["1. Regulatory Baseline Audit", "2. Ecosystem Key Node Mapping", "3. Strategic Partner Introduction"]
-                },
-                'leakage': {
-                    title: "Operational Cost Leakage Study",
-                    desc: "Targeted at Asset Owners. We deploy diagnostic cells to audit vendor SLAs and physical performance logs to stop capital dissipation.",
-                    steps: ["1. SLA Health Check", "2. Vendor Performance Diagnostic", "3. Mitigation Strategy Design"]
-                },
-                'lifecycle': {
-                    title: "Capital Strategy & Reserve Study",
-                    desc: "Perfect for Master Developers. A high-fidelity focus on long-term depreciation and capital expenditure forecasting.",
-                    steps: ["1. Physical Register Rectification", "2. 20-Year Depreciation Forecast", "3. Board-Level Decision Brief"]
-                },
-                'sourcing': {
-                    title: "B2B Sourcing Coordination",
-                    desc: "Solving supply chain friction for critical hardware. We facilitate secure B2B linkages for asset-intensive hardware sourcing.",
-                    steps: ["1. Component Mapping", "2. Trusted Network Facilitation", "3. Logistics Resilience Model"]
-                }
-            };
+            {/* Division 4 */}
+            <div className="bg-white p-8 border border-gray-100 rounded-sm hover:shadow-lg hover:border-[#009FDE]/35 transition-all space-y-4 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-sm bg-[#0B1425] flex items-center justify-center text-[#009FDE]">
+                  <svg className="w-6 h-6 text-[#009FDE]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-serif text-[#0B1425] font-bold">B2B Sourcing & Business Brokerage</h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                  Facilitating target supply structures, component mapping, and enterprise procurement linkages. Operates completely back-to-back with zero physical storage risks.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-gray-50 flex justify-between items-center text-[10px] font-semibold text-[#009FDE] tracking-wider uppercase">
+                <span>Sourcing Coordination</span>
+                <span>BACK-TO-BACK ONLY</span>
+              </div>
+            </div>
 
-            const outcome = resultsMap[challenge];
-            document.getElementById('res-title').innerText = outcome.title;
-            document.getElementById('res-desc').innerText = outcome.desc;
-            
-            const stepsList = document.getElementById('res-steps');
-            stepsList.innerHTML = '';
-            outcome.steps.forEach(step => {
-                const p = document.createElement('p');
-                p.innerText = step;
-                stepsList.appendChild(p);
-            });
+            {/* Division 5 */}
+            <div className="bg-white p-8 border border-gray-100 rounded-sm hover:shadow-lg hover:border-[#F2A900]/35 transition-all space-y-4 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-sm bg-[#0B1425] flex items-center justify-center text-[#F2A900]">
+                  <IconSmartCities />
+                </div>
+                <h3 className="text-lg font-serif text-[#0B1425] font-bold">Market Entry & Partner Mapping</h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                  Guiding global technology innovators and suppliers in navigating municipal regulations, developer frameworks, and strategic alignment parameters inside the GCC.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-gray-50 flex justify-between items-center text-[10px] font-semibold text-[#F2A900] tracking-wider uppercase">
+                <span>Entry Strategy</span>
+                <span>PARTNER MAPS</span>
+              </div>
+            </div>
 
-            // Smooth scroll to result
-            setTimeout(() => {
-                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 100);
-        }
-    </script>
-</body>
-</html>
+            {/* Division 6 */}
+            <div className="bg-white p-8 border border-gray-100 rounded-sm hover:shadow-lg hover:border-[#E21A22]/35 transition-all space-y-4 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-sm bg-[#0B1425] flex items-center justify-center text-[#E21A22]">
+                  <IconAssetOwners />
+                </div>
+                <h3 className="text-lg font-serif text-[#0B1425] font-bold">Strategic Business Advisory</h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                  High-level advisory support regarding joint ventures, sovereign bids, structure frameworks, and organizational readiness assessments across UAE municipalities.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-gray-50 flex justify-between items-center text-[10px] font-semibold text-[#E21A22] tracking-wider uppercase">
+                <span>Boardroom Advisory</span>
+                <span>GOVERNANCE ALIGNED</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {}
+      <section id="process" className="py-20 bg-[#0B1425] text-white">
+        <div className="max-w-7xl mx-auto px-6">
+          
+          <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#009FDE]">Methodology</span>
+            <h2 className="text-3xl sm:text-4xl font-serif text-white">
+              The YARMASC Strategic Process
+            </h2>
+            <p className="text-xs text-gray-400">
+              How we execute mandates, protect transaction risk, and preserve strategic clarity.
+            </p>
+          </div>
+
+          <div className="relative">
+            {/* Gradient connecting line */}
+            <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-[#009FDE] via-[#F2A900] to-[#E21A22] -translate-y-1/2 opacity-30"></div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8 relative z-10">
+              
+              {/* Step 1 */}
+              <div className="bg-[#121926] border border-[#009FDE]/20 p-6 rounded-sm text-center relative hover:border-[#009FDE] transition-colors">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#009FDE] text-white flex items-center justify-center font-bold text-xs">
+                  1
+                </div>
+                <h4 className="text-sm uppercase tracking-wider text-[#009FDE] font-bold mt-2">Discover</h4>
+                <p className="text-xs text-gray-400 leading-relaxed mt-3">
+                  Comprehensive audit of physical registers, component histories, and initial operational criteria.
+                </p>
+              </div>
+
+              {/* Step 2 */}
+              <div className="bg-[#121926] border border-[#F2A900]/20 p-6 rounded-sm text-center relative hover:border-[#F2A900] transition-colors">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#F2A900] text-white flex items-center justify-center font-bold text-xs">
+                  2
+                </div>
+                <h4 className="text-sm uppercase tracking-wider text-[#F2A900] font-bold mt-2">Diagnose</h4>
+                <p className="text-xs text-gray-400 leading-relaxed mt-3">
+                  Exposing cost leakages, evaluating supplier risk metrics, and diagnostic lifecycle checks.
+                </p>
+              </div>
+
+              {/* Step 3 */}
+              <div className="bg-[#121926] border border-[#E21A22]/20 p-6 rounded-sm text-center relative hover:border-[#E21A22] transition-colors">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#E21A22] text-white flex items-center justify-center font-bold text-xs">
+                  3
+                </div>
+                <h4 className="text-sm uppercase tracking-wider text-[#E21A22] font-bold mt-2">Structure</h4>
+                <p className="text-xs text-gray-400 leading-relaxed mt-3">
+                  Deploying custom specialist cells, drafting compliance pathways, and risk-shielding.
+                </p>
+              </div>
+
+              {/* Step 4 */}
+              <div className="bg-[#121926] border border-[#009FDE]/20 p-6 rounded-sm text-center relative hover:border-[#009FDE] transition-colors">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#009FDE] text-white flex items-center justify-center font-bold text-xs">
+                  4
+                </div>
+                <h4 className="text-sm uppercase tracking-wider text-[#009FDE] font-bold mt-2">Enable</h4>
+                <p className="text-xs text-gray-400 leading-relaxed mt-3">
+                  Facilitating coordinate connections, supplier mapping alignment, and advisory delivery execution.
+                </p>
+              </div>
+
+              {/* Step 5 */}
+              <div className="bg-[#121926] border border-[#F2A900]/20 p-6 rounded-sm text-center relative hover:border-[#F2A900] transition-colors">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#F2A900] text-white flex items-center justify-center font-bold text-xs">
+                  5
+                </div>
+                <h4 className="text-sm uppercase tracking-wider text-[#F2A900] font-bold mt-2">Optimise</h4>
+                <p className="text-xs text-gray-400 leading-relaxed mt-3">
+                  Ongoing operational reviews, lifecycle alignment diagnostics, and SLA maintenance tracking.
+                </p>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {}
+      <section id="advisor-tool" className="py-20 bg-white border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="bg-[#121926] text-white rounded-sm border border-[#009FDE]/35 overflow-hidden shadow-2xl">
+            <div className="p-8 border-b border-white/10 text-center">
+              <span className="text-[10px] font-bold tracking-widest uppercase text-[#F2A900] block mb-2">GCC CORE MATCHING PORTAL</span>
+              <h3 className="text-2xl font-serif">YARMASC Interactive Alignment Engine</h3>
+              <p className="text-xs text-gray-400 max-w-xl mx-auto mt-2">
+                Select your industry domain and primary business objective below to immediately calculate the optimal advisory roadmap.
+              </p>
+            </div>
+
+            <form onSubmit={handleInteractiveMatchSubmit} className="p-8 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#009FDE] mb-2">Target Sector / Domain</label>
+                  <select 
+                    value={selectedSector} 
+                    onChange={(e) => setSelectedSector(e.target.value)}
+                    className="w-full bg-[#0B1425] border border-[#009FDE]/30 rounded-sm p-3.5 text-xs text-white focus:border-[#009FDE] focus:ring-0"
+                  >
+                    <option value="aviation">Aviation & Advanced Mobility</option>
+                    <option value="infrastructure">Smart Critical Infrastructure</option>
+                    <option value="realestate">High-Value Commercial Real Estate</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#F2A900] mb-2">Primary Business Driver</label>
+                  <select 
+                    value={selectedChallenge} 
+                    onChange={(e) => setSelectedChallenge(e.target.value)}
+                    className="w-full bg-[#0B1425] border border-[#009FDE]/30 rounded-sm p-3.5 text-xs text-white focus:border-[#009FDE] focus:ring-0"
+                  >
+                    <option value="entry">New Market Entry / Partner Mapping</option>
+                    <option value="efficiency">SLA Optimization / Cost Leakage Diagnostics</option>
+                    <option value="lifecycle">Asset Depreciation & Capital Strategy studies</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* matched advisory summary card with brand alignment */}
+              <div className="bg-[#0B1425] border-l-4 border-[#009FDE] p-6 rounded-r-sm space-y-3 shadow-md">
+                <div className="flex justify-between items-center text-[10px] tracking-widest uppercase text-[#009FDE] font-bold">
+                  <span>PRE-VALIDATED ALIGNMENT</span>
+                  <span className="text-[#E21A22] flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#E21A22] animate-ping"></span>
+                    ACTIVE STUDY
+                  </span>
+                </div>
+                <h4 className="text-md sm:text-lg font-serif text-white font-semibold">
+                  {matchData[selectedSector]?.[selectedChallenge]?.recommendation}
+                </h4>
+                <div className="text-xs text-gray-300">
+                  <strong className="text-[#F2A900]">Recommended Steps:</strong> {matchData[selectedSector]?.[selectedChallenge]?.steps}
+                </div>
+              </div>
+
+              <div className="text-center">
+                <button 
+                  type="submit"
+                  className="bg-gradient-to-r from-[#009FDE] to-[#0081B4] hover:from-[#0081B4] hover:to-[#006A94] text-white font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-sm transition-all shadow-md"
+                >
+                  Map Selection To Custom RFQ Builder
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {}
+      <section id="usecases" className="py-20 bg-[#F8FAFC]">
+        <div className="max-w-7xl mx-auto px-6">
+          
+          <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#009FDE]">Portfolio Experience</span>
+            <h2 className="text-3xl sm:text-4xl font-serif text-[#0B1425]">
+              Representative Use Cases
+            </h2>
+            <p className="text-xs text-gray-500">
+              How our strategic networks align outcomes, protect transactions, and mitigate regulatory risk.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            {/* Case 1 */}
+            <div className="bg-white p-8 border border-gray-100 rounded-sm hover:shadow-lg transition-all space-y-4">
+              <span className="text-[10px] font-bold tracking-widest text-[#009FDE] uppercase">Advanced Mobility</span>
+              <h3 className="text-xl font-serif text-[#0B1425]">Advanced Mobility Market Entry Strategy</h3>
+              <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                Guided an international technology logistics candidate through ecosystem mapping and initial positioning requirements for regional SAVI cluster readiness. Managed all coordinate mappings and ecosystem introductions without regulatory exposure.
+              </p>
+              <div className="pt-4 border-t border-gray-100 grid grid-cols-3 gap-2 font-mono text-[10px] text-gray-400">
+                <div>
+                  <span className="block text-gray-600 font-bold">Scope:</span>
+                  <span>Ecosystem Map</span>
+                </div>
+                <div>
+                  <span className="block text-gray-600 font-bold">Region:</span>
+                  <span>Abu Dhabi, UAE</span>
+                </div>
+                <div>
+                  <span className="block text-gray-600 font-bold">Outcome:</span>
+                  <span>Platform Ready</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Case 2 */}
+            <div className="bg-white p-8 border border-gray-100 rounded-sm hover:shadow-lg transition-all space-y-4">
+              <span className="text-[10px] font-bold tracking-widest text-[#F2A900] uppercase">Built Environments</span>
+              <h3 className="text-xl font-serif text-[#0B1425]">Smart Built Asset Readiness Study</h3>
+              <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                Conducted high-yield digital asset register audits and documentation health checks for a multi-portfolio developer. Discovered documentation gaps and established strategic maintenance mapping lines protecting critical asset lifespan.
+              </p>
+              <div className="pt-4 border-t border-gray-100 grid grid-cols-3 gap-2 font-mono text-[10px] text-gray-400">
+                <div>
+                  <span className="block text-gray-600 font-bold">Scope:</span>
+                  <span>Register Rectify</span>
+                </div>
+                <div>
+                  <span className="block text-gray-600 font-bold">Region:</span>
+                  <span>Dubai, UAE</span>
+                </div>
+                <div>
+                  <span className="block text-gray-600 font-bold">Outcome:</span>
+                  <span>Risk Mitigated</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Case 3 */}
+            <div className="bg-white p-8 border border-gray-100 rounded-sm hover:shadow-lg transition-all space-y-4">
+              <span className="text-[10px] font-bold tracking-widest text-[#E21A22] uppercase">Asset Intelligence</span>
+              <h3 className="text-xl font-serif text-[#0B1425]">Asset Cost & Risk Decision Support</h3>
+              <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                Constructed detailed 20-year reserve component depreciation study and critical lifecycle analysis for a high-value aviation logistics ground terminal. Identified critical wear vulnerabilities and resolved structural cost leakages.
+              </p>
+              <div className="pt-4 border-t border-gray-100 grid grid-cols-3 gap-2 font-mono text-[10px] text-gray-400">
+                <div>
+                  <span className="block text-gray-600 font-bold">Scope:</span>
+                  <span>Lifecycle Study</span>
+                </div>
+                <div>
+                  <span className="block text-gray-600 font-bold">Region:</span>
+                  <span>GCC Wide</span>
+                </div>
+                <div>
+                  <span className="block text-gray-600 font-bold">Outcome:</span>
+                  <span>OPEX Optimized</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Case 4 */}
+            <div className="bg-white p-8 border border-gray-100 rounded-sm hover:shadow-lg transition-all space-y-4">
+              <span className="text-[10px] font-bold tracking-widest text-[#6F2C91] uppercase">Sourcing facilitating</span>
+              <h3 className="text-xl font-serif text-[#0B1425]">B2B Sourcing Coordination Study</h3>
+              <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                Facilitated supplier mapping and back-to-back supply structure for heavy terminal support hardware items without inventory holding risks. Formulated detailed procurement compliance benchmarks ensuring extreme logistical resilience.
+              </p>
+              <div className="pt-4 border-t border-gray-100 grid grid-cols-3 gap-2 font-mono text-[10px] text-gray-400">
+                <div>
+                  <span className="block text-gray-600 font-bold">Scope:</span>
+                  <span>Sourcing Map</span>
+                </div>
+                <div>
+                  <span className="block text-gray-600 font-bold">Region:</span>
+                  <span>Abu Dhabi Hub</span>
+                </div>
+                <div>
+                  <span className="block text-gray-600 font-bold">Outcome:</span>
+                  <span>Supply Secured</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {}
+      <section id="rfq-section" className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto space-y-4 mb-12">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#009FDE]">Secure Inquiry</span>
+            <h2 className="text-3xl sm:text-4xl font-serif text-[#0B1425]">
+              Request Advisory Brief / RFQ
+            </h2>
+            <p className="text-xs text-gray-500">
+              Submit your coordinate specifications or coordination objectives. An executive principal from YARMASC will directly lead the evaluation.
+            </p>
+          </div>
+
+          <div className="bg-[#FAF9F6] border border-[#009FDE]/35 p-8 sm:p-12 rounded-sm shadow-xl">
+            <form onSubmit={handleFormSubmit} className="space-y-6">
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Full Name *</label>
+                  <input 
+                    type="text" 
+                    name="name"
+                    required
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Enter your name" 
+                    className="w-full bg-white border border-gray-300 rounded-sm p-3.5 text-xs focus:border-[#009FDE] focus:ring-0 text-[#0B1425]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Company Name *</label>
+                  <input 
+                    type="text" 
+                    name="company"
+                    required
+                    value={formData.company}
+                    onChange={handleInputChange}
+                    placeholder="e.g. Airport Logistics LLC" 
+                    className="w-full bg-white border border-gray-300 rounded-sm p-3.5 text-xs focus:border-[#009FDE] focus:ring-0 text-[#0B1425]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Business Email Address *</label>
+                  <input 
+                    type="email" 
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="name@company.com" 
+                    className="w-full bg-white border border-gray-300 rounded-sm p-3.5 text-xs focus:border-[#009FDE] focus:ring-0 text-[#0B1425]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Phone Number *</label>
+                  <input 
+                    type="tel" 
+                    name="phone"
+                    required
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder="e.g. +971 50 123 4567" 
+                    className="w-full bg-white border border-gray-300 rounded-sm p-3.5 text-xs focus:border-[#009FDE] focus:ring-0 text-[#0B1425]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Target GCC Country *</label>
+                  <select 
+                    name="country"
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    className="w-full bg-white border border-gray-300 rounded-sm p-3.5 text-xs focus:border-[#009FDE] focus:ring-0 text-[#0B1425]"
+                  >
+                    <option value="United Arab Emirates">United Arab Emirates</option>
+                    <option value="Saudi Arabia">Saudi Arabia</option>
+                    <option value="Qatar">Qatar</option>
+                    <option value="Oman">Oman</option>
+                    <option value="Kuwait">Kuwait</option>
+                    <option value="Bahrain">Bahrain</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Inquiry Classification *</label>
+                  <select 
+                    name="inquiryType"
+                    value={formData.inquiryType}
+                    onChange={handleInputChange}
+                    className="w-full bg-white border border-gray-300 rounded-sm p-3.5 text-xs focus:border-[#009FDE] focus:ring-0 text-[#0B1425]"
+                  >
+                    <option value="Aviation & Advanced Mobility">Aviation & Advanced Mobility</option>
+                    <option value="VTOL / eVTOL Market Entry">VTOL / eVTOL Market Entry</option>
+                    <option value="Smart Built Environment Asset Management">Smart Built Environment Asset Management</option>
+                    <option value="Asset Intelligence / Cost Study">Asset Intelligence / Cost Study</option>
+                    <option value="B2B Sourcing Coordination">B2B Sourcing Coordination</option>
+                    <option value="Strategic Business Advisory">Strategic Business Advisory</option>
+                    <option value="General Inquiry">General Inquiry</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Industry Segment *</label>
+                <select 
+                  name="sector"
+                  value={formData.sector}
+                  onChange={handleInputChange}
+                  className="w-full bg-white border border-gray-300 rounded-sm p-3.5 text-xs focus:border-[#009FDE] focus:ring-0 text-[#0B1425]"
+                >
+                  <option value="Aviation & Infrastructure">Aviation & Infrastructure</option>
+                  <option value="Advanced Air Mobility / UAV">Advanced Air Mobility / UAV</option>
+                  <option value="Commercial Built Real Estate / Master Developer">Commercial Built Real Estate / Master Developer</option>
+                  <option value="Smart Cities & Municipal Tech">Smart Cities & Municipal Tech</option>
+                  <option value="Sovereign Fund / Capital Management">Sovereign Fund / Capital Management</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Requirement / Scope Summary *</label>
+                <textarea 
+                  name="requirementSummary"
+                  required
+                  rows={4}
+                  value={formData.requirementSummary}
+                  onChange={handleInputChange}
+                  placeholder="Summarize the core parameters of your operational requirements or regulatory entry barriers..."
+                  className="w-full bg-white border border-gray-300 rounded-sm p-3.5 text-xs focus:border-[#009FDE] focus:ring-0 text-[#0B1425]"
+                />
+              </div>
+
+              <div className="flex items-start space-x-3 bg-white p-4 border border-gray-100 rounded-sm">
+                <input 
+                  type="checkbox" 
+                  required 
+                  defaultChecked
+                  className="mt-1 h-4 w-4 text-[#009FDE] focus:ring-0 border-gray-300 rounded" 
+                />
+                <span className="text-[10px] text-gray-500 leading-relaxed">
+                  I agree that this inquiry is a strategic advisory briefing mandate. We acknowledge that regulated MRO, aviation certification design, and statutory flight approvals are handled outside YARMASC's immediate scope.
+                </span>
+              </div>
+
+              <div className="text-center pt-2">
+                <button 
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-[#009FDE] to-[#0081B4] hover:from-[#0081B4] hover:to-[#006A94] text-white font-bold text-xs uppercase tracking-[0.2em] py-4.5 rounded-sm transition-all shadow-md active:translate-y-px"
+                >
+                  Submit Formal Advisory Mandate Briefing
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {/* DISCREET STICKY CTA BUTTON (REPLACING FLOATING PURPLE/YELLOW BAR) */}
+      <div className="fixed bottom-6 right-6 z-30">
+        <button 
+          onClick={triggerRFQScroll}
+          className="bg-[#0B1425] hover:bg-[#121926] text-[#009FDE] border border-[#009FDE]/40 font-bold text-[10px] sm:text-xs uppercase tracking-widest px-6 py-4 rounded-full shadow-2xl transition-all active:scale-95 flex items-center space-x-2"
+        >
+          <span className="w-2.5 h-2.5 bg-[#E21A22] rounded-full animate-ping"></span>
+          <span>Discuss Requirement / Submit RFQ</span>
+        </button>
+      </div>
+
+      {}
+      <footer className="bg-[#0B1425] text-white border-t border-[#009FDE]/20 pt-16 pb-8 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+          
+          {/* Column 1 - Brand & Philosophy */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <img 
+                src="YarMasc Logo_2.png" 
+                alt="YARMASC Logo" 
+                onError={() => setImageError(true)}
+                className="h-10 w-auto object-contain"
+              />
+            </div>
+            <p className="text-xs text-gray-400 leading-relaxed max-w-xs">
+              Curated expert-network advisory providing strategic clarity across built portfolios, smart city systems, and next-generation mobility nodes.
+            </p>
+            <div className="text-[10px] text-[#009FDE] tracking-[0.15em] uppercase font-bold">
+              Smart Assets • Future Mobility • Operational Intelligence
+            </div>
+          </div>
+
+          {/* Column 2 - Links */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-[#F2A900]">Advisory Capabilities</h4>
+            <ul className="space-y-2.5 text-xs text-gray-400">
+              <li><a href="#capabilities" className="hover:text-white transition-colors">Aviation & Mobility Advisory</a></li>
+              <li><a href="#capabilities" className="hover:text-white transition-colors">Smart Built Asset Management</a></li>
+              <li><a href="#capabilities" className="hover:text-white transition-colors">Asset Intelligence & Risk Studies</a></li>
+              <li><a href="#capabilities" className="hover:text-white transition-colors">B2B Sourcing Coordination</a></li>
+              <li><a href="#capabilities" className="hover:text-white transition-colors">Partner Mapping & Entry</a></li>
+            </ul>
+          </div>
+
+          {/* Column 3 - Corporate Coordinates without Phone */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-[#E21A22]">GCC Hub Coordinates</h4>
+            <div className="space-y-3 text-xs text-gray-400">
+              <div>
+                <strong className="text-white block">Corporate Location:</strong>
+                <span>Masdar City Innovation Hub, Abu Dhabi, United Arab Emirates</span>
+              </div>
+              <div>
+                <strong className="text-white block">Sourcing Coordinates:</strong>
+                <span>Masdar Free Zone, Block C, Abu Dhabi</span>
+              </div>
+              <div>
+                <strong className="text-white block">Contact / Operations Liaison:</strong>
+                <a href="mailto:liaison@yarmasc.com" className="text-[#009FDE] hover:underline">liaison@yarmasc.com</a>
+              </div>
+            </div>
+          </div>
+
+          {/* Column 4 - Ecosystem Linkages */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-[#009FDE]">Partner Alliances</h4>
+            <ul className="space-y-2 text-xs text-gray-400">
+              <li className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E21A22]"></span>
+                <span>SAVI Cluster Alignments</span>
+              </li>
+              <li className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#F2A900]"></span>
+                <span>Masdar Green Ecosystem</span>
+              </li>
+              <li className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#009FDE]"></span>
+                <span>B2B Global Suppliers Network</span>
+              </li>
+              <li className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+                <span>GCC Sovereign Asset Planners</span>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+        {/* REGULATORY MANDATORY DISCLAIMER */}
+        <div className="max-w-7xl mx-auto px-6 border-t border-[#009FDE]/15 pt-8 mt-8">
+          <p className="text-[10px] sm:text-xs text-gray-400 leading-relaxed text-center">
+            <strong>REGULATORY COMPLIANCE STATEMENT:</strong> YARMASC provides advisory, brokerage, sourcing coordination, and business support services. Regulated aviation operations, aircraft maintenance, airworthiness certification, engineering design, statutory approvals, installation, and physical contracting services are outside YARMASC's direct scope unless performed by appropriately licensed third-party entities.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-6 border-t border-white/5 text-[10px] text-gray-500">
+            <span>&copy; {new Date().getFullYear()} YARMASC. All Rights Reserved. Abu Dhabi Free Zone Hub.</span>
+            <div className="space-x-4 mt-2 sm:mt-0">
+              <span className="hover:text-white cursor-pointer">Strategy Terms</span>
+              <span>&middot;</span>
+              <span className="hover:text-white cursor-pointer">Sourcing Guidelines</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      {/* SYSTEM ADVISORY NOTIFICATION MODAL */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-[#0B1425]/80 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in">
+          <div className="bg-white border-2 border-[#009FDE] p-8 max-w-lg w-full rounded-sm shadow-2xl relative space-y-4">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-[#009FDE]">YARMASC System Dispatch</span>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-black">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+              {modalMessage}
+            </p>
+            <div className="text-right">
+              <button 
+                onClick={() => setShowModal(false)} 
+                className="bg-[#0B1425] text-white hover:bg-[#009FDE] hover:text-[#0B1425] text-[10px] uppercase tracking-wider px-4 py-2 font-bold rounded-sm transition-colors"
+              >
+                Acknowledge & Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
