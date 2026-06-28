@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-// ==========================================
-// CUSTOM VECTOR GRAPHICS MATCHING LOGO COLOR MATRIX
-// ==========================================
-
 const IconAviation = () => (
   <svg className="w-8 h-8 text-[#009FDE]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
@@ -62,7 +58,6 @@ export default function App() {
   const [selectedChallenge, setSelectedChallenge] = useState('entry');
   const [imageError, setImageError] = useState(false);
 
-  // Form states containing exact parameters specified in instructions
   const [formData, setFormData] = useState({
     name: '',
     company: '',
@@ -92,7 +87,6 @@ export default function App() {
     }
   };
 
-  // Maps the alignment choices directly into the RFQ Builder below
   const handleInteractiveMatchSubmit = (e) => {
     e.preventDefault();
     const matchedInquiry = matchData[selectedSector]?.[selectedChallenge]?.inquiryType || 'General Inquiry';
@@ -482,7 +476,7 @@ export default function App() {
               </p>
             </div>
 
-            <div className="p-8 bg-[#0B1528] border-l-4 border-[#E21A22] rounded-r-sm space-y-3 shadow-md">
+            <div className="p-8 bg-[#0B1425] border-l-4 border-[#E21A22] rounded-r-sm space-y-3 shadow-md">
               <span className="text-xs font-bold uppercase tracking-widest text-[#E21A22]">Expert-Network Model</span>
               <h3 className="text-xl font-serif text-white">Elastic Specialist Deployment</h3>
               <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
@@ -1041,21 +1035,6 @@ export default function App() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Phone Number *</label>
-                  <input 
-                    type="tel" 
-                    name="phone"
-                    required
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    placeholder="e.g. +971 50 123 4567" 
-                    className="w-full bg-white border border-gray-300 rounded-sm p-3.5 text-xs focus:border-[#009FDE] focus:ring-0 text-[#0B1425]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Target GCC Country *</label>
                   <select 
                     name="country"
@@ -1071,7 +1050,9 @@ export default function App() {
                     <option value="Bahrain">Bahrain</option>
                   </select>
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Inquiry Classification *</label>
                   <select 
@@ -1089,22 +1070,22 @@ export default function App() {
                     <option value="General Inquiry">General Inquiry</option>
                   </select>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Industry Segment *</label>
-                <select 
-                  name="sector"
-                  value={formData.sector}
-                  onChange={handleInputChange}
-                  className="w-full bg-white border border-gray-300 rounded-sm p-3.5 text-xs focus:border-[#009FDE] focus:ring-0 text-[#0B1425]"
-                >
-                  <option value="Aviation & Infrastructure">Aviation & Infrastructure</option>
-                  <option value="Advanced Air Mobility / UAV">Advanced Air Mobility / UAV</option>
-                  <option value="Commercial Built Real Estate / Master Developer">Commercial Built Real Estate / Master Developer</option>
-                  <option value="Smart Cities & Municipal Tech">Smart Cities & Municipal Tech</option>
-                  <option value="Sovereign Fund / Capital Management">Sovereign Fund / Capital Management</option>
-                </select>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">Industry Segment *</label>
+                  <select 
+                    name="sector"
+                    value={formData.sector}
+                    onChange={handleInputChange}
+                    className="w-full bg-white border border-gray-300 rounded-sm p-3.5 text-xs focus:border-[#009FDE] focus:ring-0 text-[#0B1425]"
+                  >
+                    <option value="Aviation & Infrastructure">Aviation & Infrastructure</option>
+                    <option value="Advanced Air Mobility / UAV">Advanced Air Mobility / UAV</option>
+                    <option value="Commercial Built Real Estate / Master Developer">Commercial Built Real Estate / Master Developer</option>
+                    <option value="Smart Cities & Municipal Tech">Smart Cities & Municipal Tech</option>
+                    <option value="Sovereign Fund / Capital Management">Sovereign Fund / Capital Management</option>
+                  </select>
+                </div>
               </div>
 
               <div>
