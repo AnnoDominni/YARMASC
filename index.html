@@ -77,39 +77,6 @@ ul{list-style:none}
   white-space:nowrap;cursor:pointer;
 }
 .nl:hover,.nav-item:hover .nl{color:var(--bronze);background:rgba(184,151,90,.08)}
-.nl-arr{width:10px;height:10px;stroke:currentColor;stroke-width:2;fill:none;transition:transform var(--t)}
-.nav-item:hover .nl-arr{transform:rotate(180deg)}
-
-/* MEGA */
-.mega{
-  position:absolute;top:calc(100% + 10px);left:50%;
-  transform:translateX(-50%) translateY(6px);
-  background:rgba(13,27,42,.99);backdrop-filter:blur(24px);
-  border:1px solid rgba(184,151,90,.18);border-radius:var(--radius-lg);
-  padding:28px;width:560px;
-  opacity:0;visibility:hidden;pointer-events:none;
-  transition:opacity .22s ease,transform .22s ease,visibility .22s;
-  box-shadow:0 28px 70px rgba(0,0,0,.55);
-}
-.nav-item:hover .mega{opacity:1;visibility:visible;pointer-events:all;transform:translateX(-50%) translateY(0)}
-.mega-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.mi{
-  display:flex;align-items:flex-start;gap:11px;
-  padding:12px 14px;border-radius:10px;transition:background var(--t);cursor:pointer;
-}
-.mi:hover{background:rgba(184,151,90,.08)}
-.mi-ico{
-  width:32px;height:32px;border-radius:7px;flex-shrink:0;
-  background:rgba(184,151,90,.1);border:1px solid rgba(184,151,90,.15);
-  display:flex;align-items:center;justify-content:center;
-}
-.mi-ico svg{width:15px;height:15px;stroke:var(--gold);stroke-width:1.5;fill:none}
-.mi-t{font-family:-apple-system,sans-serif;font-size:11px;font-weight:600;color:rgba(255,255,255,.85);margin-bottom:2px}
-.mi-d{font-family:-apple-system,sans-serif;font-size:10px;color:rgba(255,255,255,.35);line-height:1.5}
-.mega-ft{margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center}
-.mega-ft-l{font-family:-apple-system,sans-serif;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.22)}
-.mega-ft-r{font-family:-apple-system,sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:6px}
-.mega-ft-r svg{width:10px;height:10px;stroke:currentColor;stroke-width:2;fill:none}
 
 .nav-r{display:flex;align-items:center;gap:8px}
 .n-search{
@@ -536,45 +503,7 @@ body.dark .uc-tag{background:var(--navy);border-color:rgba(255,255,255,.06)}
   <div class="nav-links">
     <div class="nav-item"><a href="#about" class="nl">About</a></div>
 
-    <!-- Capabilities Mega Menu -->
-    <div class="nav-item">
-      <a href="#capabilities" class="nl">
-        Capabilities
-        <svg class="nl-arr" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-      </a>
-      <div class="mega" role="menu">
-        <div class="mega-grid">
-          <a href="#capabilities" class="mi" role="menuitem">
-            <div class="mi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
-            <div><div class="mi-t">Aviation &amp; Advanced Mobility</div><div class="mi-d">Market intelligence, eVTOL, partner mapping</div></div>
-          </a>
-          <a href="#capabilities" class="mi" role="menuitem">
-            <div class="mi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
-            <div><div class="mi-t">Smart Built Environments</div><div class="mi-d">Asset registers, FM advisory, readiness</div></div>
-          </a>
-          <a href="#capabilities" class="mi" role="menuitem">
-            <div class="mi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div>
-            <div><div class="mi-t">Asset Intelligence</div><div class="mi-d">Cost &amp; risk studies, lifecycle analysis</div></div>
-          </a>
-          <a href="#capabilities" class="mi" role="menuitem">
-            <div class="mi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
-            <div><div class="mi-t">B2B Sourcing Coordination</div><div class="mi-d">RFQ management, supplier qualification</div></div>
-          </a>
-          <a href="#capabilities" class="mi" role="menuitem">
-            <div class="mi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
-            <div><div class="mi-t">Market Entry &amp; Partner Mapping</div><div class="mi-d">GCC access, landscape analysis</div></div>
-          </a>
-          <a href="#capabilities" class="mi" role="menuitem">
-            <div class="mi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-            <div><div class="mi-t">Strategic Business Advisory</div><div class="mi-d">Structuring, go-to-market, governance</div></div>
-          </a>
-        </div>
-        <div class="mega-ft">
-          <span class="mega-ft-l">Masdar City · Abu Dhabi · UAE &amp; GCC</span>
-          <a href="#contact" class="mega-ft-r">Discuss a Requirement <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></a>
-        </div>
-      </div>
-    </div>
+    <div class="nav-item"><a href="#capabilities" class="nl">Capabilities</a></div>
 
     <div class="nav-item"><a href="#industries" class="nl">Industries</a></div>
     <div class="nav-item"><a href="#process" class="nl">Process</a></div>
