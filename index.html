@@ -886,19 +886,23 @@ body.dark .uc-tag{background:var(--navy);border-color:rgba(255,255,255,.06)}
           </div>
         </div>
       </div>
-      <div class="cf-wrap rv d2">
+      <form class="cf-wrap rv d2" id="rfq-form" action="https://api.web3forms.com/submit" method="POST">
+        <input type="hidden" name="access_key" value="008d3812-de19-40dd-b2d2-1fe684cc40e2">
+        <input type="hidden" name="subject" value="New RFQ Submission — YARMASC Website">
+        <input type="hidden" name="from_name" value="YARMASC Website">
+        <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
         <div class="fg">
-          <div class="fgrp"><label class="flbl" for="fn">Full Name</label><input class="fin" type="text" id="fn" placeholder="Your name" autocomplete="name"></div>
-          <div class="fgrp"><label class="flbl" for="fc">Company</label><input class="fin" type="text" id="fc" placeholder="Organisation name" autocomplete="organization"></div>
-          <div class="fgrp"><label class="flbl" for="fe">Email Address</label><input class="fin" type="email" id="fe" placeholder="your@email.com" autocomplete="email"></div>
-          <div class="fgrp"><label class="flbl" for="fp">Phone (Optional)</label><input class="fin" type="tel" id="fp" placeholder="+971 …" autocomplete="tel"></div>
-          <div class="fgrp"><label class="flbl" for="fco">Country</label><select class="fsel" id="fco"><option value="" disabled selected>Select country</option><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Qatar</option><option>Kuwait</option><option>Bahrain</option><option>Oman</option><option>Other</option></select></div>
-          <div class="fgrp"><label class="flbl" for="fse">Sector</label><select class="fsel" id="fse"><option value="" disabled selected>Select sector</option><option>Aviation</option><option>Airports &amp; Terminals</option><option>Smart Cities &amp; Infrastructure</option><option>Real Estate &amp; Built Environments</option><option>Energy &amp; Utilities</option><option>Government &amp; Public Sector</option><option>Investment &amp; Finance</option><option>Advanced Mobility / UAM</option><option>Other</option></select></div>
-          <div class="fgrp full"><label class="flbl" for="fi">Inquiry Type</label><select class="fsel" id="fi"><option value="" disabled selected>Select inquiry type</option><option>Aviation &amp; Advanced Mobility</option><option>VTOL / eVTOL Market Entry</option><option>Smart Built Environment Asset Management</option><option>Asset Intelligence / Cost Study</option><option>B2B Sourcing Coordination</option><option>Strategic Business Advisory</option><option>General Inquiry</option></select></div>
-          <div class="fgrp full"><label class="flbl" for="fs">Requirement Summary</label><textarea class="ftxt" id="fs" placeholder="Briefly describe your requirement, context and desired outcome…"></textarea></div>
+          <div class="fgrp"><label class="flbl" for="fn">Full Name</label><input class="fin" type="text" id="fn" name="Full Name" placeholder="Your name" autocomplete="name" required></div>
+          <div class="fgrp"><label class="flbl" for="fc">Company</label><input class="fin" type="text" id="fc" name="Company" placeholder="Organisation name" autocomplete="organization"></div>
+          <div class="fgrp"><label class="flbl" for="fe">Email Address</label><input class="fin" type="email" id="fe" name="Email" placeholder="your@email.com" autocomplete="email" required></div>
+          <div class="fgrp"><label class="flbl" for="fp">Phone (Optional)</label><input class="fin" type="tel" id="fp" name="Phone" placeholder="+971 …" autocomplete="tel"></div>
+          <div class="fgrp"><label class="flbl" for="fco">Country</label><select class="fsel" id="fco" name="Country"><option value="" disabled selected>Select country</option><option>United Arab Emirates</option><option>Saudi Arabia</option><option>Qatar</option><option>Kuwait</option><option>Bahrain</option><option>Oman</option><option>Other</option></select></div>
+          <div class="fgrp"><label class="flbl" for="fse">Sector</label><select class="fsel" id="fse" name="Sector"><option value="" disabled selected>Select sector</option><option>Aviation</option><option>Airports &amp; Terminals</option><option>Smart Cities &amp; Infrastructure</option><option>Real Estate &amp; Built Environments</option><option>Energy &amp; Utilities</option><option>Government &amp; Public Sector</option><option>Investment &amp; Finance</option><option>Advanced Mobility / UAM</option><option>Other</option></select></div>
+          <div class="fgrp full"><label class="flbl" for="fi">Inquiry Type</label><select class="fsel" id="fi" name="Inquiry Type"><option value="" disabled selected>Select inquiry type</option><option>Aviation &amp; Advanced Mobility</option><option>VTOL / eVTOL Market Entry</option><option>Smart Built Environment Asset Management</option><option>Asset Intelligence / Cost Study</option><option>B2B Sourcing Coordination</option><option>Strategic Business Advisory</option><option>General Inquiry</option></select></div>
+          <div class="fgrp full"><label class="flbl" for="fs">Requirement Summary</label><textarea class="ftxt" id="fs" name="Requirement Summary" placeholder="Briefly describe your requirement, context and desired outcome…"></textarea></div>
         </div>
-        <button class="fsub" id="fsub" onclick="doSubmit()">Submit Requirement</button>
-      </div>
+        <button class="fsub" id="fsub" type="submit">Submit Requirement</button>
+      </form>
     </div>
   </div>
 </section>
@@ -1026,15 +1030,45 @@ setTimeout(()=>{
   document.querySelectorAll('.hc-bar').forEach(b=>{b.style.width=b.getAttribute('data-w')+'%'});
 },800);
 
-/* FORM */
-function doSubmit(){
-  const btn=document.getElementById('fsub');
-  if(!document.getElementById('fn').value.trim()||!document.getElementById('fe').value.trim()){
-    btn.textContent='Please enter your name and email';btn.style.background='rgba(160,50,50,.55)';
-    setTimeout(()=>{btn.textContent='Submit Requirement';btn.style.background=''},2200);return;
-  }
-  btn.textContent='Sending…';btn.disabled=true;
-  setTimeout(()=>{btn.textContent='Enquiry Received \u2014 We Will Be in Touch';btn.style.background='linear-gradient(135deg,#2d6a4f,#3a8060)'},1200);
+/* FORM — real submission to Web3Forms */
+const rfqForm=document.getElementById('rfq-form');
+if(rfqForm){
+  rfqForm.addEventListener('submit',async function(e){
+    e.preventDefault();
+    const btn=document.getElementById('fsub');
+    const nameVal=document.getElementById('fn').value.trim();
+    const emailVal=document.getElementById('fe').value.trim();
+    if(!nameVal||!emailVal){
+      btn.textContent='Please enter your name and email';
+      btn.style.background='rgba(160,50,50,.55)';
+      setTimeout(()=>{btn.textContent='Submit Requirement';btn.style.background=''},2200);
+      return;
+    }
+    btn.textContent='Sending…';
+    btn.disabled=true;
+    btn.style.background='';
+    try{
+      const formData=new FormData(rfqForm);
+      const res=await fetch('https://api.web3forms.com/submit',{
+        method:'POST',
+        headers:{'Accept':'application/json'},
+        body:formData
+      });
+      const result=await res.json();
+      if(result.success){
+        btn.textContent='Enquiry Received \u2014 We Will Be in Touch';
+        btn.style.background='linear-gradient(135deg,#2d6a4f,#3a8060)';
+        rfqForm.reset();
+      }else{
+        throw new Error(result.message||'Submission failed');
+      }
+    }catch(err){
+      btn.textContent='Something went wrong \u2014 please email us directly';
+      btn.style.background='rgba(160,50,50,.55)';
+      btn.disabled=false;
+      setTimeout(()=>{btn.textContent='Submit Requirement';btn.style.background=''},3500);
+    }
+  });
 }
 
 /* REDUCED MOTION */
